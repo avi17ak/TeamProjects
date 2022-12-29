@@ -1,0 +1,19 @@
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    text-align: center;
+} 
+
+#lengthCheck, #numericCheck, #upperCaseCheck, #specialCharCheck {
+    display: block;
+    position: relative;
+    margin: 4%;
+    color: red;
+    font-size: 18px;
+    width: 92%;
+}
+
+span{
+    margin: 10px;
+    font-weight: bo;
+}

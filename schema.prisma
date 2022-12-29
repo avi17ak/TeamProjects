@@ -1,0 +1,149 @@
+model Users {
+  id                       Int               @id @unique @default(autoincrement())
+  email                    String            @unique
+  password                 String
+  firstName                String?
+  lastName                 String?
+  profileURL               String?
+  accType                  Role?             @default(STANDARD)
+  verified                 Boolean?          @default(false)
+  accCreated               DateTime?         @default(now())
+  startDate                DateTime?
+  gender                   String?
+  articlesPublished        Articles[]
+  postsPublished           Posts[]
+  tasksPublished           Tasks[]
+  childTasksPublished      ChildTasks[]
+  topicsPublished          Topics[]
+  projectsPublished        Projects[]
+  postCommentsPublished    PostComments[]
+  articleCommentsPublished ArticleComments[]
+}
+
+model Articles {
+  id          Int               @id @unique @default(autoincrement())
+  type        ArticleType?
+  title       String
+  authors     Users[]
+  content     String?
+  draft       Boolean           @default(false)
+  published   DateTime?         @default(now())
+  updatedLast DateTime?         @default(now()) @updatedAt
+  tags        Tags[]
+  comments    ArticleComments[]
+}
+
+model Tags {
+  id       Int        @id @unique @default(autoincrement())
+  name     String
+  articles Articles[]
+}
+
+model ArticleComments {
+  id         Int       @id @unique @default(autoincrement())
+  comment    String
+  published  DateTime? @default(now())
+  article    Articles? @relation(fields: [articlesId], references: [id])
+  writtenBy  Users?    @relation(fields: [usersId], references: [id])
+  articlesId Int?
+  usersId    Int?
+}
+
+model Posts {
+  id        Int            @id @unique @default(autoincrement())
+  content   String
+  comments  PostComments[]
+  author    Users?         @relation(fields: [usersId], references: [id])
+  topic     Topics?        @relation(fields: [topicsId], references: [id])
+  published DateTime?      @default(now())
+  usersId   Int?
+  topicsId  Int?
+}
+
+model Topics {
+  id          Int     @id @unique @default(autoincrement())
+  name        String
+  description String?
+  posts       Posts[]
+  creator     Users?  @relation(fields: [usersId], references: [id])
+  usersId     Int?
+}
+
+model PostComments {
+  id        Int       @id @unique @default(autoincrement())
+  comment   String
+  published DateTime? @default(now())
+  post      Posts?    @relation(fields: [postsId], references: [id])
+  writtenBy Users?    @relation(fields: [usersId], references: [id])
+  postsId   Int?
+  usersId   Int?
+}
+
+model Projects {
+  id        Int          @id @unique @default(autoincrement())
+  name      String
+  published DateTime     @default(now())
+  deadline  DateTime?
+  client    String?
+  lanes     BoardLanes[]
+  teamLead  Users?       @relation(fields: [usersId], references: [id])
+  tasks     Tasks[]
+  usersId   Int?
+}
+
+model BoardLanes {
+  id         Int      @id @unique @default(autoincrement())
+  name       String
+  position   Int?
+  project    Projects @relation(fields: [projectsId], references: [id])
+  tasks      Tasks[]
+  projectsId Int
+}
+
+model Tasks {
+  id           Int          @id @unique @default(autoincrement())
+  name         String
+  description  String?
+  hours        Int
+  position     Int
+  status       TaskStatus?
+  members      Users[]
+  childTask    ChildTasks[]
+  lane         BoardLanes   @relation(fields: [boardLanesId], references: [id])
+  project      Projects?    @relation(fields: [projectsId], references: [id])
+  published    DateTime?    @default(now())
+  boardLanesId Int
+  projectsId   Int?
+}
+
+model ChildTasks {
+  id          Int         @id @unique @default(autoincrement())
+  name        String
+  description String?
+  hours       Int
+  position    Int
+  status      TaskStatus?
+  members     Users[]
+  task        Tasks       @relation(fields: [tasksId], references: [id])
+  published   DateTime?   @default(now())
+  tasksId     Int
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  TEAM_LEADER
+  STANDARD
+}
+
+enum ArticleType {
+  Technical
+  NonTechnical
+}
+
+enum TaskStatus {
+  Completed
+  InProgress
+  NotStarted
+  Overdue
+}
